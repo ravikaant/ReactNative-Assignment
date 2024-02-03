@@ -5,114 +5,106 @@
  * @format
  */
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
+import React, {useState} from 'react';
 import {
+  Pressable,
   SafeAreaView,
-  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
-  useColorScheme,
   View,
 } from 'react-native';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
-
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
+import {Colors} from 'react-native/Libraries/NewAppScreen';
+import SearchGif from './src/SearchGif';
+import TrendingGifs from './src/Trending';
 
 function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [currentTab, setCurrentTab] = useState<'trending' | 'search'>(
+    'trending',
+  );
+  const toggleTheme = () =>
+    setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
   const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+    backgroundColor: theme === 'dark' ? Colors.darker : Colors.lighter,
+  };
+  const container = {
+    flex: 1,
   };
 
+  const styles = StyleSheet.create({
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      backgroundColor: theme === 'dark' ? '#000' : '#fff',
+      borderColor: theme === 'dark' ? '#fff' : '#000',
+      // borderBottomWidth: 1,
+      elevation: 3,
+      shadowColor: theme === 'dark' ? '#fff' : '#000',
+      shadowOpacity: 1,
+      shadowRadius: 12,
+    },
+    buttonTextStyle: {
+      color: theme === 'dark' ? '#fff' : '#000',
+      fontSize: 14,
+      fontWeight: '500',
+    },
+    selectedButtonText: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: theme === 'dark' ? 'red' : 'green',
+    },
+    tabContainer: {
+      flex: 1,
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+    },
+  });
+
   return (
-    <SafeAreaView style={backgroundStyle}>
+    <SafeAreaView style={[backgroundStyle, container]}>
       <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+        barStyle={theme === 'dark' ? 'light-content' : 'dark-content'}
         backgroundColor={backgroundStyle.backgroundColor}
       />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
+      <View style={styles.header}>
+        <View style={styles.tabContainer}>
+          <Pressable onPress={() => setCurrentTab('trending')}>
+            <Text
+              style={[
+                styles.buttonTextStyle,
+                currentTab === 'trending' && styles.selectedButtonText,
+              ]}>
+              Trending
+            </Text>
+          </Pressable>
+          <Pressable onPress={() => setCurrentTab('search')}>
+            <Text
+              style={[
+                styles.buttonTextStyle,
+                currentTab === 'search' && styles.selectedButtonText,
+              ]}>
+              Search
+            </Text>
+          </Pressable>
         </View>
-      </ScrollView>
+        <Pressable onPress={toggleTheme}>
+          <Text style={styles.buttonTextStyle}>
+            {theme === 'light' ? 'Dark' : 'Light'}
+          </Text>
+        </Pressable>
+      </View>
+      {currentTab === 'trending' ? (
+        <TrendingGifs theme={theme} />
+      ) : (
+        <SearchGif theme={theme} />
+      )}
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
 
 export default App;
